@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	common "github.com/ekhabarov/go-common"
 	"github.com/mdspinc/mag/endpoint"
 )
 
@@ -18,19 +19,20 @@ func StringHandler(rw *bufio.ReadWriter) {
 	log.Println(s)
 	_, err = rw.WriteString("Response message.\n")
 	if err != nil {
-		log.Println("Cannot write to connection.\n", err)
+		common.FatalIf(err)
 	}
 	err = rw.Flush()
 	if err != nil {
-		log.Println("Flush failed.", err)
+		common.FatalIf(err)
 	}
 }
 
 func main() {
+	cfg := ReadConfig()
 	e := endpoint.New()
 	e.AddHandler("STR", StringHandler)
 
-	err := e.Listen()
-	FatalIf(err)
+	err := e.Listen(cfg.String())
+	common.FatalIf(err)
 	log.Println("Server quit")
 }

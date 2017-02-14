@@ -25,9 +25,9 @@ func (e *Endpoint) AddHandler(name string, h Handler) {
 	e.handler[name] = h
 }
 
-func (e *Endpoint) Listen() error {
+func (e *Endpoint) Listen(addr string) error {
 	var err error
-	e.listener, err = net.Listen("tcp", ":3050")
+	e.listener, err = net.Listen("tcp", addr)
 	if err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func (e *Endpoint) Listen() error {
 			log.Println("Failed accepting a connection request:", err)
 			continue
 		}
-		log.Println("Handle incoming messages.")
+		//log.Println("Handle incoming messages.")
 		go e.handleMessage(conn)
 	}
 }
@@ -48,7 +48,7 @@ func (e *Endpoint) handleMessage(conn net.Conn) {
 	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
 	defer conn.Close()
 	for {
-		log.Print("Receive command '")
+		//log.Print("Receive command '")
 		cmd, err := rw.ReadString('\n')
 		switch {
 		case err == io.EOF:
@@ -59,7 +59,7 @@ func (e *Endpoint) handleMessage(conn net.Conn) {
 			return
 		}
 		cmd = strings.Trim(cmd, "\n ")
-		log.Println(cmd + "'")
+		//log.Println(cmd + "'")
 		handler, ok := e.handler[cmd]
 		if !ok {
 			log.Println("Command '" + cmd + "' is not registered.")
