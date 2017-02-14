@@ -7,6 +7,7 @@ import (
 	"net"
 	"strings"
 
+	"github.com/mdspinc/mag/agg"
 	"github.com/mdspinc/mag/handler"
 )
 
@@ -17,14 +18,21 @@ type (
 		listener net.Listener
 		handler  map[string]Handler
 		out      chan interface{}
+		agg      agg.Aggregator
 	}
 )
 
-func New() *Endpoint {
+func New(t agg.Type) *Endpoint {
 	e := &Endpoint{
 		handler: map[string]Handler{},
 		out:     make(chan interface{}),
 	}
+
+	switch t {
+	case agg.AGGTYPE_STRING:
+		e.agg = agg.NewStringAgg(5)
+	}
+
 	e.AddHandler("STR", handler.StringHandler)
 	e.AddHandler("ERR", handler.ErrorHandler)
 	return e
@@ -39,7 +47,8 @@ func (e *Endpoint) MessageRouter() {
 		v := <-e.out
 		switch t := v.(type) {
 		case string:
-			log.Println("got string value: ", t)
+			e.agg.Aggregate(t)
+			log.Printf("got: %s; buffer len: %d ", t, e.agg.Count(t))
 		case error:
 			log.Println("got error value: ", t)
 		default:
@@ -48,8 +57,7 @@ func (e *Endpoint) MessageRouter() {
 	}
 }
 
-func (e *Endpoint) Listen(addr string) error {
-	var err error
+func (e *Endpoint) Listen(addr string) (err error) {
 	e.listener, err = net.Listen("tcp", addr)
 	if err != nil {
 		return err
