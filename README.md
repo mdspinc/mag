@@ -9,6 +9,6 @@ to adapters, which, in turn, translate it to developers via Slack, EMail etc.
 | Variable | Type | Description | 
 | :---: | :---: | :---|
 | `LSITEN_ADDRESS` | string | Address to listen to, e.g. 127.0.0.1. Default is 0.0.0.0 | 
-| `LISTEN_PORT` | integer | Porn number to listen to. Default 3050 |
+| `LISTEN_PORT` | integer | Port number to listen to. Default is 3050 |
 
 
