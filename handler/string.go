@@ -4,8 +4,6 @@ import (
 	"bufio"
 	"log"
 	"strings"
-
-	common "github.com/ekhabarov/go-common"
 )
 
 func StringHandler(rw *bufio.ReadWriter, out chan interface{}) {
@@ -14,14 +12,14 @@ func StringHandler(rw *bufio.ReadWriter, out chan interface{}) {
 	if err != nil {
 		log.Println("Cannot read from connection.\n", err)
 	}
-	s = strings.Trim(s, "\n ")
-	out <- s
+	out <- strings.Trim(s, "\n ")
+
 	_, err = rw.WriteString("Response message.\n")
 	if err != nil {
-		common.FatalIf(err)
+		log.Println("string handler: response write error:", err)
 	}
-	err = rw.Flush()
-	if err != nil {
-		common.FatalIf(err)
+
+	if err = rw.Flush(); err != nil {
+		log.Println("string handler: flush error:", err)
 	}
 }

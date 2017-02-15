@@ -10,7 +10,7 @@ import (
 
 func main() {
 	cfg := ReadConfig()
-	e := endpoint.New(agg.AGGTYPE_STRING)
+	e := endpoint.New(agg.AGGTYPE_STRING) //, sender.NewSlackSender())
 
 	err := e.Listen(cfg.String())
 	common.FatalIf(err)

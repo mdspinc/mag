@@ -6,7 +6,9 @@ import (
 	"log"
 	"net"
 	"strings"
+	"time"
 
+	common "github.com/ekhabarov/go-common"
 	"github.com/mdspinc/mag/agg"
 	"github.com/mdspinc/mag/handler"
 )
@@ -22,16 +24,15 @@ type (
 	}
 )
 
-func New(t agg.Type) *Endpoint {
+func New(aggType agg.Type) *Endpoint {
 	e := &Endpoint{
 		handler: map[string]Handler{},
 		out:     make(chan interface{}),
 	}
 
-	switch t {
-	case agg.AGGTYPE_STRING:
-		e.agg = agg.NewStringAgg(5)
-	}
+	a, err := agg.New(aggType, 5, time.Second*30)
+	common.LogIf(err, "endpoint", "new")
+	e.agg = a
 
 	e.AddHandler("STR", handler.StringHandler)
 	e.AddHandler("ERR", handler.ErrorHandler)
