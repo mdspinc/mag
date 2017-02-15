@@ -1,3 +1,4 @@
+// Package sender represents connectors for different services such as Slack, EMail, etc.
 package sender
 
 type (

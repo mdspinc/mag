@@ -1,3 +1,4 @@
+// Package endpoint provides simple TCP listener.
 package endpoint
 
 import (

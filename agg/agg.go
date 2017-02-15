@@ -1,3 +1,4 @@
+// Package agg provides typed aggregators for collecting messages.
 package agg
 
 import (
