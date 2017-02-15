@@ -1,8 +1,7 @@
 package sender
 
 type (
-	Type int
-
+	// Transport for messages.
 	Transport interface {
 		Send(interface{}) error
 	}

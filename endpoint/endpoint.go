@@ -14,8 +14,10 @@ import (
 )
 
 type (
+	// Handler function for processing messages.
 	Handler func(*bufio.ReadWriter, chan interface{})
 
+	// Endpoint represents the TCP listener and connected aggregator.
 	Endpoint struct {
 		listener net.Listener
 		handler  map[string]Handler
@@ -24,6 +26,7 @@ type (
 	}
 )
 
+// Initialises new Endpoint instance.
 func New(aggType agg.Type) *Endpoint {
 	e := &Endpoint{
 		handler: map[string]Handler{},
@@ -39,10 +42,12 @@ func New(aggType agg.Type) *Endpoint {
 	return e
 }
 
+// Add new handler to Endpoint.
 func (e *Endpoint) AddHandler(name string, h Handler) {
 	e.handler[name] = h
 }
 
+// Redirects handled messages to typed aggregator.
 func (e *Endpoint) MessageRouter() {
 	for {
 		v := <-e.out
@@ -58,6 +63,7 @@ func (e *Endpoint) MessageRouter() {
 	}
 }
 
+// Starts to listen given interface.
 func (e *Endpoint) Listen(addr string) (err error) {
 	e.listener, err = net.Listen("tcp", addr)
 	if err != nil {
@@ -78,6 +84,7 @@ func (e *Endpoint) Listen(addr string) (err error) {
 	}
 }
 
+// Handles incoming messages based on its type.
 func (e *Endpoint) handleMessages(conn net.Conn) {
 	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
 	defer conn.Close()

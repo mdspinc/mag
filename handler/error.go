@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Hander for Error values.
 func ErrorHandler(rw *bufio.ReadWriter, out chan interface{}) {
 	log.Print("Receive ERROR message:")
 	errMessage, err := rw.ReadString('\n')

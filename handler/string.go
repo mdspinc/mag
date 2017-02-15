@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Handler for String values
 func StringHandler(rw *bufio.ReadWriter, out chan interface{}) {
 	log.Print("Receive STRING message:")
 	s, err := rw.ReadString('\n')

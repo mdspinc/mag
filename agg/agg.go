@@ -34,8 +34,8 @@ const (
 	AGGTYPE_STRING Type = iota
 )
 
+// Initializes new Aggregator instance.
 func New(t Type, batchSize int, flushPeriod time.Duration) (Aggregator, error) {
-
 	switch t {
 	case AGGTYPE_STRING:
 		sa := NewStringAgg(batchSize)
@@ -46,6 +46,7 @@ func New(t Type, batchSize int, flushPeriod time.Duration) (Aggregator, error) {
 	}
 }
 
+// Runs Ticker for flushing messages by time.
 func runTicker(fp time.Duration, a Aggregator) *time.Ticker {
 	ticker := time.NewTicker(fp)
 	go func() {

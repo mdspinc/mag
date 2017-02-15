@@ -10,11 +10,13 @@ var (
 	ErrInvalidMessageType = errors.New("sender: slack: invalid message type.")
 )
 
+// Slack sender.
 type Slack struct {
 	client  *slack.Client
 	channel string
 }
 
+// Initializes Slack sender instance.
 func NewSlackSender() (*Slack, error) {
 	cfg := readConfig()
 
@@ -31,14 +33,7 @@ func NewSlackSender() (*Slack, error) {
 	}, nil
 }
 
-//func (ss *SlackSender) Channel() string {
-//return ss.channel
-//}
-
-//func (ss *SlackSender) Client() *slack.Client {
-//return ss.client
-//}
-
+// Sends messages.
 func (s *Slack) Send(msg interface{}) error {
 	p := slack.NewPostMessageParameters()
 	p.AsUser = true
