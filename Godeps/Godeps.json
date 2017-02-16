@@ -1,0 +1,20 @@
+{
+	"ImportPath": "github.com/mdspinc/mag",
+	"GoVersion": "go1.7",
+	"GodepVersion": "v79",
+	"Deps": [
+		{
+			"ImportPath": "github.com/ekhabarov/go-common",
+			"Rev": "a0ea6c9437adaaf728a15e626dc50feb629ef4dc"
+		},
+		{
+			"ImportPath": "github.com/nlopes/slack",
+			"Comment": "v0.0.1-174-g46211dd",
+			"Rev": "46211dd87bc6dba492b0d72f1db389cd5087d690"
+		},
+		{
+			"ImportPath": "golang.org/x/net/websocket",
+			"Rev": "f2499483f923065a842d38eb4c7f1927e6fc6e6d"
+		}
+	]
+}
