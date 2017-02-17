@@ -3,6 +3,7 @@ package endpoint
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -28,18 +29,18 @@ type (
 )
 
 // Initialises new Endpoint instance.
-func New(aggType agg.Type) *Endpoint {
+func New(aggType agg.Type, maxMessages int, timeLimit time.Duration) *Endpoint {
 	e := &Endpoint{
 		handler: map[string]Handler{},
 		out:     make(chan interface{}),
 	}
 
-	a, err := agg.New(aggType, 5, time.Second*30)
-	common.LogIf(err, "endpoint", "new")
+	a, err := agg.New(aggType, maxMessages, time.Second*timeLimit)
+	common.LogIf(err, "endpoint: new")
 	e.agg = a
 
-	e.AddHandler("STR", handler.StringHandler)
-	e.AddHandler("ERR", handler.ErrorHandler)
+	e.AddHandler("STRING", handler.StringHandler)
+	e.AddHandler("ERROR", handler.ErrorHandler)
 	return e
 }
 
@@ -55,11 +56,10 @@ func (e *Endpoint) MessageRouter() {
 		switch t := v.(type) {
 		case string:
 			e.agg.Aggregate(t)
-			log.Printf("got: %s; buffer len: %d ", t, e.agg.Count(t))
 		case error:
 			log.Println("got error value: ", t)
 		default:
-			log.Println("got unknown type value")
+			log.Println("endpoint: message router: unknown type value")
 		}
 	}
 }
@@ -76,9 +76,8 @@ func (e *Endpoint) Listen(addr string) (err error) {
 	log.Println("Listen on", e.listener.Addr().String())
 	for {
 		conn, err := e.listener.Accept()
-		log.Println("Got connection")
 		if err != nil {
-			log.Println("Failed accepting a connection request:", err)
+			log.Println("endpoint: listen:", err)
 			continue
 		}
 		go e.handleMessages(conn)
@@ -102,7 +101,9 @@ func (e *Endpoint) handleMessages(conn net.Conn) {
 		cmd = strings.Trim(cmd, "\n ")
 		handler, ok := e.handler[cmd]
 		if !ok {
-			log.Println("Command '" + cmd + "' is not registered.")
+			s := fmt.Sprintf("Command %q is not registered.\n", cmd)
+			log.Println(s)
+			send(rw, s)
 			return
 		}
 		handler(rw, e.out)

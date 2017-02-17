@@ -9,14 +9,11 @@ import (
 
 // Hander for Error values.
 func ErrorHandler(rw *bufio.ReadWriter, out chan interface{}) {
-	log.Print("Receive ERROR message:")
-	errMessage, err := rw.ReadString('\n')
+	msg, err := rw.ReadString('\n')
 	if err != nil {
 		log.Println("Cannot read from connection.\n", err)
+		return
 	}
-	errMessage = strings.Trim(errMessage, "\n ")
-	e := errors.New(errMessage)
-
-	//log.Println("Error data:", e)
-	out <- e
+	msg = strings.Trim(msg, "\n ")
+	out <- errors.New(msg)
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	common "github.com/ekhabarov/go-common"
 	"github.com/mdspinc/mag/agg"
@@ -10,7 +11,7 @@ import (
 
 func main() {
 	cfg := ReadConfig()
-	e := endpoint.New(agg.AGGTYPE_STRING) //, sender.NewSlackSender())
+	e := endpoint.New(agg.AGGTYPE_STRING, cfg.MaxMessages, time.Duration(cfg.TimeLimit))
 
 	err := e.Listen(cfg.String())
 	common.FatalIf(err)
