@@ -59,8 +59,6 @@ func (s *StringAgg) Aggregate(data interface{}) {
 
 // See Aggregator interface desciption.
 func (s *StringAgg) Flush(key string) {
-	log.Println("flush:", key)
-
 	if err := s.sender.Send(fmt.Sprintf(MsgTpl, key, s.buffer[key])); err != nil {
 		log.Println("agg: string: flush error:", err)
 		return

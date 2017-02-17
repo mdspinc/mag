@@ -3,7 +3,6 @@ package agg
 
 import (
 	"errors"
-	"log"
 	"time"
 )
 
@@ -52,7 +51,6 @@ func runTicker(fp time.Duration, a Aggregator) *time.Ticker {
 	ticker := time.NewTicker(fp)
 	go func() {
 		for range ticker.C {
-			log.Println("FLUSH BY TIME")
 			a.FlushAll(fp)
 		}
 	}()

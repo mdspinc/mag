@@ -57,7 +57,7 @@ func (e *Endpoint) MessageRouter() {
 		case string:
 			e.agg.Aggregate(t)
 		case error:
-			log.Println("got error value: ", t)
+			//log.Println("got error value: ", t)
 		default:
 			log.Println("endpoint: message router: unknown type value")
 		}
@@ -92,10 +92,10 @@ func (e *Endpoint) handleMessages(conn net.Conn) {
 		cmd, err := rw.ReadString('\n')
 		switch {
 		case err == io.EOF:
-			log.Println("Reached EOF - close this connection.\n   ---")
+			//log.Println("Client distconnected.")
 			return
 		case err != nil:
-			log.Println("\nError reading command. Got: '"+cmd+"'\n", err)
+			//log.Println("\nError reading command. Got: '"+cmd+"'\n", err)
 			return
 		}
 		cmd = strings.Trim(cmd, "\n ")
