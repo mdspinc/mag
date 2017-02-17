@@ -12,9 +12,11 @@ godoc -http=:8080
 
 ## Usage
 ```golang
+	import "github.com/mdspinc/mag/magclient"
+	
 	err := magclient.Setup("127.0.0.1", 3040)
 	if err != nil {
-		...
+		//...
 	}
 
 	magclient.Send("Some string")
