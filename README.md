@@ -5,11 +5,20 @@ Service made as a simple TCP server which accepts messages on address and port
 provided by ENV variables. All messages are grouped by some attribute and send
 to adapters, which, in turn, translate it to developers via Slack, EMail etc.
 
-## Dependencies
-
 ## Documetation
 ```bash 
 godoc -http=:8080
+```
+
+## Usage
+```golang
+	err := magclient.Setup("127.0.0.1", 3040)
+	if err != nil {
+		...
+	}
+
+	magclient.Send("Some string")
+
 ```
 
 ## Application parts
@@ -38,4 +47,5 @@ Each sender is an adapter to some service like Slack, Email(not implemented yet)
 | `LISTEN_PORT` | integer | Port number to listen to. Default is 3050 |
 | `SLACK_TOKEN` | string | Token for accessing Slack from [this](https://api.slack.com/docs/oauth-test-tokens) page.|
 | `SLACK_CHANNEL` | string | Channel for posting messages. |
-
+| `AGG_MAX_MESSAGES` | integer | Number of messages to send. |
+| `AGG_TIME_LIMIT` | integer | Send any number (less than `AGG_MAX_MESSAGES` ) of messages each `AGG_TIME_LIMIT` seconds. |
