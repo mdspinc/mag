@@ -89,3 +89,10 @@ func (s *StringAgg) Count(key string) int {
 	defer s.RUnlock()
 	return s.buffer[key]
 }
+
+// Returnd number of different messages
+func (s *StringAgg) Len() int {
+	s.RLock()
+	defer s.RUnlock()
+	return len(s.buffer)
+}

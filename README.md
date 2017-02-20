@@ -42,7 +42,7 @@ will be sent.
 Each sender is an adapter to some service like Slack, Email(not implemented yet), etc.
 
 
-## Environment variagbles 
+## Environment variables 
 | Variable | Type | Description | 
 | :---: | :---: | :--- |
 | `LSITEN_ADDRESS` | string | Address to listen to, e.g. 127.0.0.1. Default is 0.0.0.0 | 
