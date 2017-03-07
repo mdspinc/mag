@@ -14,11 +14,13 @@ var (
 	ErrClientIsNotInitialized = errors.New("magclient: setup: client is not initialized")
 )
 
+// Setup initializes client variable.
 func Setup(host string, port int) (err error) {
 	client, err = NewClient(host, port)
 	return err
 }
 
+// Send sends data to server and handle reconnects.
 func Send(data string) error {
 	if client == nil || client.rw == nil {
 		return ErrClientIsNotInitialized
