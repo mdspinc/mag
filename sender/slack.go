@@ -2,6 +2,7 @@ package sender
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/nlopes/slack"
 )
@@ -14,6 +15,8 @@ var (
 type Slack struct {
 	client  *slack.Client
 	channel string
+	// List of users with ID for @mention
+	mention string
 }
 
 // Initializes Slack sender instance.
@@ -22,14 +25,28 @@ func NewSlackSender() (*Slack, error) {
 
 	client := slack.New(cfg.token)
 	_, err := client.AuthTest()
-
 	if err != nil {
 		return nil, err
+	}
+
+	m := []string{}
+	slackUsers, err := client.GetUsers()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, u := range cfg.users {
+		for _, su := range slackUsers {
+			if su.Name == u {
+				m = append(m, u)
+			}
+		}
 	}
 
 	return &Slack{
 		client:  client,
 		channel: cfg.channel,
+		mention: "@" + strings.Join(m, ", @"),
 	}, nil
 }
 
@@ -37,9 +54,11 @@ func NewSlackSender() (*Slack, error) {
 func (s *Slack) Send(msg interface{}) error {
 	p := slack.NewPostMessageParameters()
 	p.AsUser = true
+	p.LinkNames = 1
 
 	switch m := msg.(type) {
 	case string:
+		m += s.mention
 		if _, _, err := s.client.PostMessage(s.channel, m, p); err != nil {
 			return err
 		}
