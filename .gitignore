@@ -1,2 +1,2 @@
-env
-mag
+cmd/mag/env
+cmd/mag/mag
