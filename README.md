@@ -51,3 +51,8 @@ Each sender is an adapter to some service like Slack, Email(not implemented yet)
 | `SLACK_CHANNEL` | string | Channel for posting messages. |
 | `AGG_MAX_MESSAGES` | integer | Number of messages to send. |
 | `AGG_TIME_LIMIT` | integer | Send any number (less than `AGG_MAX_MESSAGES` ) of messages each `AGG_TIME_LIMIT` seconds. |
+| `NOTIFY_USERS` | string | List of user for mention in Slack for default messages. |
+| `BOTSMETRICS_API_ADDRESS` | string | API address with campaign statistics. |
+| `MONITOR_INTERVAL` | integer | Number of seconds between requests to BOTSMETRIC API. |
+| `MONITOR_MAX_STORED_ITEMS` | integer | Number of items to store and analyze. |
+| `NOTIFY_MONITOR_USERS` | string | List of users for mention in Slack for monitoring messages. |
