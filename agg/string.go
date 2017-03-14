@@ -59,7 +59,7 @@ func (s *StringAgg) Aggregate(data interface{}) {
 
 // See Aggregator interface desciption.
 func (s *StringAgg) Flush(key string) {
-	if err := s.sender.Send(fmt.Sprintf(MsgTpl, key, s.buffer[key])); err != nil {
+	if err := s.sender.Send(fmt.Sprintf(MsgTpl, key, s.buffer[key]), sender.DEFAULT_MESSAGE); err != nil {
 		log.Println("agg: string: flush error:", err)
 		return
 	}
@@ -79,7 +79,7 @@ func (s *StringAgg) FlushAll(p time.Duration) {
 		delete(s.buffer, k)
 	}
 	if len(b.String()) > 0 {
-		s.sender.Send(b.String())
+		s.sender.Send(b.String(), sender.DEFAULT_MESSAGE)
 	}
 }
 

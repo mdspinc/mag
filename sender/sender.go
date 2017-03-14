@@ -4,6 +4,6 @@ package sender
 type (
 	// Transport for messages.
 	Transport interface {
-		Send(interface{}) error
+		Send(interface{}, MessageType) error
 	}
 )

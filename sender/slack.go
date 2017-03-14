@@ -15,9 +15,19 @@ var (
 type Slack struct {
 	client  *slack.Client
 	channel string
-	// List of users with ID for @mention
+	// List of users with ID for @mention with default messages
 	mention string
+
+	// List of user for monitoring
+	monitorMention string
 }
+
+type MessageType int
+
+const (
+	DEFAULT_MESSAGE MessageType = iota
+	MONITOR_MESSAGE
+)
 
 // Initializes Slack sender instance.
 func NewSlackSender() (*Slack, error) {
@@ -30,6 +40,7 @@ func NewSlackSender() (*Slack, error) {
 	}
 
 	m := []string{}
+	mm := []string{}
 	slackUsers, err := client.GetUsers()
 	if err != nil {
 		return nil, err
@@ -43,22 +54,37 @@ func NewSlackSender() (*Slack, error) {
 		}
 	}
 
+	for _, u := range cfg.monitorUsers {
+		for _, su := range slackUsers {
+			if su.Name == u {
+				mm = append(mm, u)
+			}
+		}
+	}
+
 	return &Slack{
-		client:  client,
-		channel: cfg.channel,
-		mention: "@" + strings.Join(m, ", @"),
+		client:         client,
+		channel:        cfg.channel,
+		mention:        "@" + strings.Join(m, ", @"),
+		monitorMention: "@" + strings.Join(mm, ", @"),
 	}, nil
 }
 
 // Sends messages.
-func (s *Slack) Send(msg interface{}) error {
+func (s *Slack) Send(msg interface{}, msgType MessageType) error {
 	p := slack.NewPostMessageParameters()
 	p.AsUser = true
 	p.LinkNames = 1
 
 	switch m := msg.(type) {
 	case string:
-		m += s.mention
+		switch msgType {
+		case MONITOR_MESSAGE:
+			m += s.monitorMention
+		default:
+			m += s.mention
+		}
+
 		if _, _, err := s.client.PostMessage(s.channel, m, p); err != nil {
 			return err
 		}
