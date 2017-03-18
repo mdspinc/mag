@@ -12,6 +12,8 @@ import (
 	"github.com/mdspinc/mag/sender"
 )
 
+const MonitorMessage = "Number of `FREQUENCY_KEY_PRESENT` errors for all campaigns is %d for last *%d* seconds."
+
 type (
 	Monitor struct {
 		// Source of data
@@ -19,11 +21,12 @@ type (
 		interval              int
 		ticker                *time.Ticker
 		max                   int
-		store                 []map[string]*storedCamp
+		store                 []Store
 		sender                sender.Transport
+		fkpThreshold          int
 	}
 
-	// Campaign info stored in modnitor.
+	// Campaign info stored in monitor.
 	storedCamp struct {
 		impressions         int
 		frequencyKeyPresent int
@@ -42,7 +45,7 @@ type (
 )
 
 // New initialized Monitor struct.
-func New(address string, interval int, maxItems int) *Monitor {
+func New(address string, interval, maxItems, fkpThreshold int) *Monitor {
 	ss, err := sender.NewSlackSender()
 	if err != nil {
 		log.Println("monitor: New: error:", err)
@@ -54,6 +57,7 @@ func New(address string, interval int, maxItems int) *Monitor {
 		ticker:                time.NewTicker(time.Second * time.Duration(interval)),
 		max:                   maxItems,
 		sender:                ss,
+		fkpThreshold:          fkpThreshold,
 	}
 }
 
@@ -76,13 +80,15 @@ func (m *Monitor) Start() {
 		}
 	}()
 
-	log.Printf("Monitor started with %d seconds interval.\n", m.interval)
+	log.Printf(
+		"Monitor started with %d seconds interval and %d FKP threshold. \n",
+		m.interval, m.fkpThreshold)
 }
 
 // Fetch requests data from API.
 func (m *Monitor) Fetch() error {
 	cc := &data{}
-	r := make(map[string]*storedCamp)
+	r := NewStore()
 
 	resp, err := http.Get(m.BotsmetricsApiAddress)
 	if err != nil {
@@ -115,32 +121,21 @@ func (m *Monitor) Fetch() error {
 	return nil
 }
 
-// Check check values if impressions and error FREQUENCY_KEY_PRESENT. If
-// FREQUENCY_KEY_PRESENT still the same while impressions happend  and frequency
-// capping(didn't check yet) is set than notify someone in slack.
+// Check checks number of errors of type FREQUENCY_KEY_PRESENT.
+// If number of errors for all campaigns is less than FKP_THRESHOLD
+// send notification to slack.
 func (m *Monitor) Check() {
 	if len(m.store) < 2 {
 		return
 	}
 
 	last := len(m.store) - 1
-	prelast := len(m.store) - 2
+	penult := len(m.store) - 2
 
-	for k, v := range m.store[last] {
-		imp1 := v.impressions
-		fkp1 := v.frequencyKeyPresent
-		if fkp1 == 0 {
-			continue
-		}
-		imp2 := m.store[prelast][k].impressions
-		fkp2 := m.store[prelast][k].frequencyKeyPresent
-		if fkp1 == fkp2 && (imp2+3) < imp1 && imp1 > 0 {
-			//fmt.Printf("id: %s\t fkp2: %d,  imp2: %d \t fkp1: %d, imp1: %d\n",
-			//k, fkp2, imp2, fkp1, imp1)
-			m.sender.Send(fmt.Sprintf(
-				"Campaign: *%s*, imps changed: %d -> %d for last *%d* seconds, but `FREQUENCY_KEY_PRESENT` is the same: %d.",
-				k, imp2, imp1, m.interval, fkp1,
-			), sender.MONITOR_MESSAGE)
-		}
+	diff := m.store[last].SumFKP() - m.store[penult].SumFKP()
+
+	if diff < m.fkpThreshold {
+		m.sender.Send(
+			fmt.Sprintf(MonitorMessage, diff, m.interval), sender.MONITOR_MESSAGE)
 	}
 }

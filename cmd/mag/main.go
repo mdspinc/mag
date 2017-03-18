@@ -22,6 +22,7 @@ func main() {
 		cfg.BotsmetricsApiAddress,
 		cfg.MonitorInterval,
 		cfg.MonitorMaxStoredItems,
+		cfg.FKPTreshold,
 	)
 	m.Start()
 

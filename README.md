@@ -56,3 +56,5 @@ Each sender is an adapter to some service like Slack, Email(not implemented yet)
 | `MONITOR_INTERVAL` | integer | Number of seconds between requests to BOTSMETRIC API. |
 | `MONITOR_MAX_STORED_ITEMS` | integer | Number of items to store and analyze. |
 | `NOTIFY_MONITOR_USERS` | string | List of users for mention in Slack for monitoring messages. |
+| `FKP_THRESHOLD` | integer | Send notification if number of errors of type `FREQUENCY_KEY_PRESENT` for last `MONITOR_INTERVAL` seconds is less than threshold value. |
+

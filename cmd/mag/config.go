@@ -29,6 +29,10 @@ const (
 
 	// Maximum number of requests to store for analyze.
 	MONITOR_MAX_STORED_ITEMS = "MONITOR_MAX_STORED_ITEMS"
+
+	// Send notification if number of errors of type FREQUENCY_KEY_PRESENT
+	// for last MONITOR_INTERVAL seconds is less than threshold value.
+	FKP_THRESHOLD = "FKP_THRESHOLD"
 )
 
 // Configuration settings.
@@ -40,6 +44,7 @@ type Config struct {
 	BotsmetricsApiAddress string
 	MonitorInterval       int
 	MonitorMaxStoredItems int
+	FKPTreshold           int
 }
 
 // Returns address with port to listen to.
@@ -59,6 +64,7 @@ func ReadConfig() *Config {
 	common.ReadEnvIntParam(&cfg.TimeLimit, 30, AGG_TIME_LIMIT)
 	common.ReadEnvIntParam(&cfg.MonitorInterval, 300, MONITOR_INTERVAL)
 	common.ReadEnvIntParam(&cfg.MonitorMaxStoredItems, 3, MONITOR_MAX_STORED_ITEMS)
+	common.ReadEnvIntParam(&cfg.FKPTreshold, 1000, FKP_THRESHOLD)
 
 	return cfg
 }
