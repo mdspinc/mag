@@ -9,8 +9,13 @@ import (
 var (
 	client *Client
 
-	ErrHostIsEmpty            = errors.New("magclient: setup: host is empty")
-	ErrPortIsEmpty            = errors.New("magclient: setup: port is empty")
+	// ErrHostIsEmpty happen when host is empty string or it's not presented.
+	ErrHostIsEmpty = errors.New("magclient: setup: host is empty")
+
+	// ErrPortIsEmpty happen when port is not presented.
+	ErrPortIsEmpty = errors.New("magclient: setup: port is empty")
+
+	// ErrClientIsNotInitialized happen if client was not be initialized.
 	ErrClientIsNotInitialized = errors.New("magclient: setup: client is not initialized")
 )
 
@@ -31,12 +36,10 @@ func Send(data string) error {
 		if nerr, ok := err.(net.Error); ok {
 			if rerr := client.Reconnect(); rerr != nil {
 				return fmt.Errorf("magclient: send: reconnect error: %s\n", rerr)
-			} else {
-				return fmt.Errorf("magclient: send: network error: %s\n", nerr)
 			}
-		} else {
-			return fmt.Errorf("magclient: send: error: %s\n", err)
+			return fmt.Errorf("magclient: send: network error: %s\n", nerr)
 		}
+		return fmt.Errorf("magclient: send: error: %s\n", err)
 	}
 
 	return nil

@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// Handler for String values
+// StringHandler is a handler for String values.
 func StringHandler(rw *bufio.ReadWriter, out chan interface{}) {
 	msg, err := rw.ReadString('\n')
 	if err != nil {

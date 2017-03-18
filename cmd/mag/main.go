@@ -13,13 +13,13 @@ import (
 func main() {
 	cfg := ReadConfig()
 	e := endpoint.New(
-		agg.AGGTYPE_STRING,
+		agg.AggtypeString,
 		cfg.MaxMessages,
 		time.Duration(cfg.TimeLimit),
 	)
 
 	m := monitor.New(
-		cfg.BotsmetricsApiAddress,
+		cfg.BotsmetricsAPIAddress,
 		cfg.MonitorInterval,
 		cfg.MonitorMaxStoredItems,
 		cfg.FKPTreshold,

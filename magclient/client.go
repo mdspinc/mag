@@ -7,7 +7,7 @@ import (
 	"net"
 )
 
-// Represents client.
+// Client struct represents client for mag server.
 type Client struct {
 	conn *net.Conn
 	rw   *bufio.ReadWriter

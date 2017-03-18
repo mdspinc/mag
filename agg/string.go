@@ -11,11 +11,11 @@ import (
 )
 
 const (
-	MsgTpl       = "Message `%q` was repeated *%d* time(s).\n"
-	MsgTplPeriod = "Message `%q` was repeated *%d* time(s) for last %.0f seconds.\n"
+	msgTpl       = "Message `%q` was repeated *%d* time(s).\n"
+	msgTplPeriod = "Message `%q` was repeated *%d* time(s) for last %.0f seconds.\n"
 )
 
-// Simple string aggregator which collects strings as is.
+// StringAgg is a simple string aggregator which collects strings as is.
 type StringAgg struct {
 	sync.RWMutex
 
@@ -29,7 +29,7 @@ type StringAgg struct {
 	sender sender.Transport
 }
 
-// Initialises new StringAgg instance.
+// NewStringAgg initialises new StringAgg instance.
 func NewStringAgg(bs int) *StringAgg {
 	ss, err := sender.NewSlackSender()
 	if err != nil {
@@ -43,7 +43,7 @@ func NewStringAgg(bs int) *StringAgg {
 	}
 }
 
-// See Aggregator interface desciption.
+// Aggregate collects incoming messages.
 func (s *StringAgg) Aggregate(data interface{}) {
 	s.Lock()
 	defer s.Unlock()
@@ -57,9 +57,10 @@ func (s *StringAgg) Aggregate(data interface{}) {
 	}
 }
 
-// See Aggregator interface desciption.
+// Flush flushes collected messages to sender.  It called if one of
+// conditions happend: batchSize limit exceeded or period of time is up.
 func (s *StringAgg) Flush(key string) {
-	if err := s.sender.Send(fmt.Sprintf(MsgTpl, key, s.buffer[key]), sender.DEFAULT_MESSAGE); err != nil {
+	if err := s.sender.Send(fmt.Sprintf(msgTpl, key, s.buffer[key]), sender.DefaultMessage); err != nil {
 		log.Println("agg: string: flush error:", err)
 		return
 	}
@@ -69,28 +70,28 @@ func (s *StringAgg) Flush(key string) {
 	delete(s.buffer, key)
 }
 
-// See Aggregator interface desciption.
+// FlushAll flushes all messages to sender and clear the buffer.
 func (s *StringAgg) FlushAll(p time.Duration) {
 	s.Lock()
 	defer s.Unlock()
 	b := bytes.NewBufferString("")
 	for k, v := range s.buffer {
-		b.WriteString(fmt.Sprintf(MsgTplPeriod, k, v, p.Seconds()))
+		b.WriteString(fmt.Sprintf(msgTplPeriod, k, v, p.Seconds()))
 		delete(s.buffer, k)
 	}
 	if len(b.String()) > 0 {
-		s.sender.Send(b.String(), sender.DEFAULT_MESSAGE)
+		s.sender.Send(b.String(), sender.DefaultMessage)
 	}
 }
 
-// See Aggregator interface desciption.
+// Count returns number of collected messages.
 func (s *StringAgg) Count(key string) int {
 	s.RLock()
 	defer s.RUnlock()
 	return s.buffer[key]
 }
 
-// Returnd number of different messages
+// Len returns number of different messages
 func (s *StringAgg) Len() int {
 	s.RLock()
 	defer s.RUnlock()

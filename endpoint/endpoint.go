@@ -28,7 +28,7 @@ type (
 	}
 )
 
-// Initialises new Endpoint instance.
+// New initialises new Endpoint instance.
 func New(aggType agg.Type, maxMessages int, timeLimit time.Duration) *Endpoint {
 	e := &Endpoint{
 		handler: map[string]Handler{},
@@ -44,12 +44,12 @@ func New(aggType agg.Type, maxMessages int, timeLimit time.Duration) *Endpoint {
 	return e
 }
 
-// Add new handler to Endpoint.
+// AddHandler adds new handler to Endpoint.
 func (e *Endpoint) AddHandler(name string, h Handler) {
 	e.handler[name] = h
 }
 
-// Redirects handled messages to typed aggregator.
+// MessageRouter redirects handled messages to typed aggregator.
 func (e *Endpoint) MessageRouter() {
 	for {
 		v := <-e.out
@@ -64,7 +64,7 @@ func (e *Endpoint) MessageRouter() {
 	}
 }
 
-// Starts to listen given interface.
+// Listen starts to listen given interface.
 func (e *Endpoint) Listen(addr string) (err error) {
 	e.listener, err = net.Listen("tcp", addr)
 	if err != nil {

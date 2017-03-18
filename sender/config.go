@@ -6,15 +6,15 @@ import (
 )
 
 const (
-	SLACK_TOKEN   = "SLACK_TOKEN"
-	SLACK_CHANNEL = "SLACK_CHANNEL"
+	slackToken   = "SLACK_TOKEN"
+	slackChannel = "SLACK_CHANNEL"
 
 	// Include user names into messages with @ prefix
-	NOTIFY_USERS         = "NOTIFY_USERS"
-	NOTIFY_MONITOR_USERS = "NOTIFY_MONITOR_USERS"
+	notifyUsers        = "NOTIFY_USERS"
+	notifyMonitorUsers = "NOTIFY_MONITOR_USERS"
 )
 
-// Configuration settings for Slack sender.
+// Config contains settings for Slack sender.
 type Config struct {
 	token        string
 	channel      string
@@ -22,12 +22,12 @@ type Config struct {
 	monitorUsers []string
 }
 
-// Fills out Config struct.
+// readConfig fills out Config struct.
 func readConfig() *Config {
 	return &Config{
-		token:        os.Getenv(SLACK_TOKEN),
-		channel:      os.Getenv(SLACK_CHANNEL),
-		users:        strings.Split(os.Getenv(NOTIFY_USERS), ","),
-		monitorUsers: strings.Split(os.Getenv(NOTIFY_MONITOR_USERS), ","),
+		token:        os.Getenv(slackToken),
+		channel:      os.Getenv(slackChannel),
+		users:        strings.Split(os.Getenv(notifyUsers), ","),
+		monitorUsers: strings.Split(os.Getenv(notifyMonitorUsers), ","),
 	}
 }

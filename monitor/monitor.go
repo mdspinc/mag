@@ -12,12 +12,14 @@ import (
 	"github.com/mdspinc/mag/sender"
 )
 
+// MonitorMessage is a notification message template.
 const MonitorMessage = "Number of `FREQUENCY_KEY_PRESENT` errors for all campaigns is %d for last *%d* seconds."
 
 type (
+	// Monitor is a monitoring data and settings.
 	Monitor struct {
 		// Source of data
-		BotsmetricsApiAddress string
+		BotsmetricsAPIAddress string
 		interval              int
 		ticker                *time.Ticker
 		max                   int
@@ -52,7 +54,7 @@ func New(address string, interval, maxItems, fkpThreshold int) *Monitor {
 	}
 
 	return &Monitor{
-		BotsmetricsApiAddress: address,
+		BotsmetricsAPIAddress: address,
 		interval:              interval,
 		ticker:                time.NewTicker(time.Second * time.Duration(interval)),
 		max:                   maxItems,
@@ -63,7 +65,7 @@ func New(address string, interval, maxItems, fkpThreshold int) *Monitor {
 
 // Start runs monitor process.
 func (m *Monitor) Start() {
-	if m.BotsmetricsApiAddress == "" {
+	if m.BotsmetricsAPIAddress == "" {
 		log.Println("monitor: BotsmetricsApiAddress is empty, monitoring is disabled")
 		return
 	}
@@ -90,7 +92,7 @@ func (m *Monitor) Fetch() error {
 	cc := &data{}
 	r := NewStore()
 
-	resp, err := http.Get(m.BotsmetricsApiAddress)
+	resp, err := http.Get(m.BotsmetricsAPIAddress)
 	if err != nil {
 		return err
 	}
@@ -136,6 +138,6 @@ func (m *Monitor) Check() {
 
 	if diff < m.fkpThreshold {
 		m.sender.Send(
-			fmt.Sprintf(MonitorMessage, diff, m.interval), sender.MONITOR_MESSAGE)
+			fmt.Sprintf(MonitorMessage, diff, m.interval), sender.MonitorMessage)
 	}
 }

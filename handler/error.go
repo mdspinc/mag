@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// Hander for Error values.
+// ErrorHandler is a handler for Error values.
 func ErrorHandler(rw *bufio.ReadWriter, out chan interface{}) {
 	msg, err := rw.ReadString('\n')
 	if err != nil {

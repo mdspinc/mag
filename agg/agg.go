@@ -7,12 +7,15 @@ import (
 )
 
 var (
-	ErrInvalidAggregatorType = errors.New("agg: new: invalid aggregator type.")
+	// ErrInvalidAggregatorType returned when aggregation type is not string.
+	ErrInvalidAggregatorType = errors.New("agg: new: invalid aggregator type")
 )
 
 type (
+	// Type is a aggregation type.
 	Type byte
 
+	// Aggregator is an interface for aggregation.
 	Aggregator interface {
 		//Collects incoming messages.
 		Aggregate(interface{})
@@ -31,13 +34,14 @@ type (
 )
 
 const (
-	AGGTYPE_STRING Type = iota
+	// AggtypeString represents aggresation for strings only.
+	AggtypeString Type = iota
 )
 
-// Initializes new Aggregator instance.
+// New initializes new Aggregator instance.
 func New(t Type, batchSize int, flushPeriod time.Duration) (Aggregator, error) {
 	switch t {
-	case AGGTYPE_STRING:
+	case AggtypeString:
 		sa := NewStringAgg(batchSize)
 		runTicker(flushPeriod, sa)
 		return sa, nil

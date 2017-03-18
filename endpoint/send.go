@@ -7,6 +7,7 @@ import (
 	common "github.com/ekhabarov/go-common"
 )
 
+// ErrBufferIsNil returned when nothing to send.
 var ErrBufferIsNil = errors.New("endpoint: send: rw is nil")
 
 func send(rw *bufio.ReadWriter, data string) error {
