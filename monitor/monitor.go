@@ -28,12 +28,6 @@ type (
 		fkpThreshold          int
 	}
 
-	// Campaign info stored in monitor.
-	storedCamp struct {
-		impressions         int
-		frequencyKeyPresent int
-	}
-
 	// Data is a struct for JSON unmarshalng.
 	data struct {
 		Campaigns []struct {
@@ -108,10 +102,7 @@ func (m *Monitor) Fetch() error {
 	}
 
 	for _, c := range cc.Campaigns {
-		r[c.ID] = &storedCamp{
-			frequencyKeyPresent: c.Errors.FrequencyKeyPresent,
-			impressions:         c.Impressions,
-		}
+		r[c.ID] = newStoredCamp(c.Errors.FrequencyKeyPresent, c.Impressions)
 	}
 
 	m.store = append(m.store, r)
@@ -134,7 +125,7 @@ func (m *Monitor) Check() {
 	last := len(m.store) - 1
 	penult := len(m.store) - 2
 
-	diff := m.store[last].SumFKP() - m.store[penult].SumFKP()
+	diff := m.store[last].Diff(m.store[penult])
 
 	if diff < m.fkpThreshold {
 		m.sender.Send(
