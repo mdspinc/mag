@@ -24,6 +24,9 @@ const (
 	// Botsmetrics API address
 	botsmetricsAPIAddress = "BOTSMETRICS_API_ADDRESS"
 
+	// Botsmetrics API JWT token
+	botsmetricsAPIToken = "BBTSMERTICS_API_TOKEN"
+
 	// Number of seconds between requests BOTSMETRIC_API_ADDRESS
 	monitorInterval = "MONITOR_INTERVAL"
 
@@ -42,6 +45,7 @@ type Config struct {
 	MaxMessages           int
 	TimeLimit             int
 	BotsmetricsAPIAddress string
+	BotsmetricsAPIToken   string
 	MonitorInterval       int
 	MonitorMaxStoredItems int
 	FKPTreshold           int
@@ -57,6 +61,7 @@ func ReadConfig() *Config {
 	cfg := &Config{
 		Address:               os.Getenv(listenAddress),
 		BotsmetricsAPIAddress: os.Getenv(botsmetricsAPIAddress),
+		BotsmetricsAPIToken:   os.Getenv(botsmetricsAPIToken),
 	}
 
 	common.ReadEnvIntParam(&cfg.Port, 3050, listenPort)

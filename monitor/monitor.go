@@ -20,6 +20,7 @@ type (
 	Monitor struct {
 		// Source of data
 		BotsmetricsAPIAddress string
+		BotsmetricsAPIToken   string
 		interval              int
 		ticker                *time.Ticker
 		max                   int
@@ -41,7 +42,7 @@ type (
 )
 
 // New initialized Monitor struct.
-func New(address string, interval, maxItems, fkpThreshold int) *Monitor {
+func New(address, token string, interval, maxItems, fkpThreshold int) *Monitor {
 	ss, err := sender.NewSlackSender()
 	if err != nil {
 		log.Println("monitor: New: error:", err)
@@ -49,6 +50,7 @@ func New(address string, interval, maxItems, fkpThreshold int) *Monitor {
 
 	return &Monitor{
 		BotsmetricsAPIAddress: address,
+		BotsmetricsAPIToken:   token,
 		interval:              interval,
 		ticker:                time.NewTicker(time.Second * time.Duration(interval)),
 		max:                   maxItems,
@@ -86,15 +88,30 @@ func (m *Monitor) Fetch() error {
 	cc := &data{}
 	r := NewStore()
 
-	resp, err := http.Get(m.BotsmetricsAPIAddress)
+	req, err := http.NewRequest("GET", m.BotsmetricsAPIAddress, nil)
 	if err != nil {
 		return err
 	}
+
+	req.Header.Add("Authorization", "Bearer "+m.BotsmetricsAPIToken)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode != http.StatusOK ||
+		resp.StatusCode != http.StatusTemporaryRedirect ||
+		resp.StatusCode != http.StatusPermanentRedirect {
+		return fmt.Errorf("monitor fetch: bad response status: %d", resp.StatusCode)
 	}
 
 	if err := json.Unmarshal(body, &cc); err != nil {
