@@ -25,7 +25,7 @@ const (
 	botsmetricsAPIAddress = "BOTSMETRICS_API_ADDRESS"
 
 	// Botsmetrics API JWT token
-	botsmetricsAPIToken = "BBTSMERTICS_API_TOKEN"
+	botsmetricsAPIToken = "BOTSMERTICS_API_TOKEN"
 
 	// Number of seconds between requests BOTSMETRIC_API_ADDRESS
 	monitorInterval = "MONITOR_INTERVAL"
