@@ -108,8 +108,8 @@ func (m *Monitor) Fetch() error {
 		return err
 	}
 
-	if resp.StatusCode != http.StatusOK ||
-		resp.StatusCode != http.StatusTemporaryRedirect ||
+	if resp.StatusCode != http.StatusOK &&
+		resp.StatusCode != http.StatusTemporaryRedirect &&
 		resp.StatusCode != http.StatusPermanentRedirect {
 		return fmt.Errorf("monitor fetch: bad response status: %d", resp.StatusCode)
 	}
