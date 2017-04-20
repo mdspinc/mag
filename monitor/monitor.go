@@ -2,6 +2,7 @@
 package monitor
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -19,14 +20,17 @@ type (
 	// Monitor is a monitoring data and settings.
 	Monitor struct {
 		// Source of data
-		BotsmetricsAPIAddress string
-		BotsmetricsAPIToken   string
-		interval              int
-		ticker                *time.Ticker
-		max                   int
-		store                 []Store
-		sender                sender.Transport
-		fkpThreshold          int
+		APIAddress           string
+		APIToken             string
+		tokenRefreshAddress  string
+		tokenRefreshInterval int
+		interval             int
+		ticker               *time.Ticker
+		tokenTicker          *time.Ticker
+		max                  int
+		store                []Store
+		sender               sender.Transport
+		fkpThreshold         int
 	}
 
 	// Data is a struct for JSON unmarshalng.
@@ -39,30 +43,45 @@ type (
 			} `json:"errors"`
 		}
 	}
+
+	refreshTokenData struct {
+		Token string `json:"token"`
+	}
 )
 
 // New initialized Monitor struct.
-func New(address, token string, interval, maxItems, fkpThreshold int) *Monitor {
+func New(
+	address string,
+	token string,
+	refreshAddress string,
+	tokenRefreshInterval int,
+	interval int,
+	maxItems int,
+	fkpThreshold int,
+) *Monitor {
 	ss, err := sender.NewSlackSender()
 	if err != nil {
 		log.Println("monitor: New: error:", err)
 	}
 
 	return &Monitor{
-		BotsmetricsAPIAddress: address,
-		BotsmetricsAPIToken:   token,
-		interval:              interval,
-		ticker:                time.NewTicker(time.Second * time.Duration(interval)),
-		max:                   maxItems,
-		sender:                ss,
-		fkpThreshold:          fkpThreshold,
+		APIAddress:           address,
+		APIToken:             token,
+		tokenRefreshAddress:  refreshAddress,
+		tokenRefreshInterval: tokenRefreshInterval,
+		interval:             interval,
+		ticker:               time.NewTicker(time.Second * time.Duration(interval)),
+		tokenTicker:          time.NewTicker(time.Second * time.Duration(tokenRefreshInterval)),
+		max:                  maxItems,
+		sender:               ss,
+		fkpThreshold:         fkpThreshold,
 	}
 }
 
 // Start runs monitor process.
 func (m *Monitor) Start() {
-	if m.BotsmetricsAPIAddress == "" {
-		log.Println("monitor: BotsmetricsApiAddress is empty, monitoring is disabled")
+	if m.APIAddress == "" {
+		log.Println("monitor: ApiAddress is empty, monitoring is disabled")
 		return
 	}
 
@@ -79,8 +98,17 @@ func (m *Monitor) Start() {
 	}()
 
 	log.Printf(
-		"Monitor started with %d seconds interval and %d FKP threshold. \n",
-		m.interval, m.fkpThreshold)
+		"Monitor started. Monitor interval is %d, FKP threshold is %d, token refresh interval is %d. \n",
+		m.interval, m.fkpThreshold, m.tokenRefreshInterval)
+
+	go func() {
+		for {
+			<-m.tokenTicker.C
+			if err := m.RefreshToken(); err != nil {
+				log.Println(err)
+			}
+		}
+	}()
 }
 
 // Fetch requests data from API.
@@ -88,12 +116,12 @@ func (m *Monitor) Fetch() error {
 	cc := &data{}
 	r := NewStore()
 
-	req, err := http.NewRequest("GET", m.BotsmetricsAPIAddress, nil)
+	req, err := http.NewRequest("GET", m.APIAddress, nil)
 	if err != nil {
 		return err
 	}
 
-	req.Header.Add("Authorization", "Bearer "+m.BotsmetricsAPIToken)
+	req.Header.Add("Authorization", "Bearer "+m.APIToken)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -148,4 +176,43 @@ func (m *Monitor) Check() {
 		m.sender.Send(
 			fmt.Sprintf(MonitorMessage, diff, m.interval), sender.MonitorMessage)
 	}
+}
+
+// RefreshToken renews authetication token.
+func (m *Monitor) RefreshToken() error {
+	if m.tokenRefreshAddress == "" {
+		return fmt.Errorf("monitor: refresh token: refresh address is empty")
+	}
+
+	t := &refreshTokenData{
+		Token: m.APIToken,
+	}
+	b := &bytes.Buffer{}
+	json.NewEncoder(b).Encode(t)
+
+	resp, err := http.Post(m.tokenRefreshAddress, "application/json", b)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK &&
+		resp.StatusCode != http.StatusTemporaryRedirect &&
+		resp.StatusCode != http.StatusPermanentRedirect {
+		return fmt.Errorf("monitor refresh token: bad response status: %d", resp.StatusCode)
+	}
+
+	if err := json.Unmarshal(body, &t); err != nil {
+		return err
+	}
+
+	m.APIToken = t.Token
+
+	return nil
 }

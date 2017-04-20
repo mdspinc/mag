@@ -19,8 +19,10 @@ func main() {
 	)
 
 	m := monitor.New(
-		cfg.BotsmetricsAPIAddress,
-		cfg.BotsmetricsAPIToken,
+		cfg.APIAddress,
+		cfg.APIToken,
+		cfg.APITokenRefreshAddress,
+		cfg.APITokenRefreshInterval,
 		cfg.MonitorInterval,
 		cfg.MonitorMaxStoredItems,
 		cfg.FKPTreshold,

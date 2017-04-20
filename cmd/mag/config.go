@@ -21,11 +21,17 @@ const (
 	// more than zero every AGG_TIME_LIMIT seconds.
 	aggTimeLimit = "AGG_TIME_LIMIT"
 
-	// Botsmetrics API address
-	botsmetricsAPIAddress = "BOTSMETRICS_API_ADDRESS"
+	// API address
+	APIAddress = "API_ADDRESS"
 
-	// Botsmetrics API JWT token
-	botsmetricsAPIToken = "BOTSMERTICS_API_TOKEN"
+	// API JWT token
+	APIToken = "API_TOKEN"
+
+	// Number of seconds betwenn requests for token refresh.
+	APITokenRefreshInterval = "API_TOKEN_REFRESH_INTERVAL"
+
+	// Address for refresh token request.
+	APITokenRefreshAddress = "API_TOKEN_REFRESH_ADDRESS"
 
 	// Number of seconds between requests BOTSMETRIC_API_ADDRESS
 	monitorInterval = "MONITOR_INTERVAL"
@@ -40,15 +46,17 @@ const (
 
 // Config is a configuration settings store.
 type Config struct {
-	Address               string
-	Port                  int
-	MaxMessages           int
-	TimeLimit             int
-	BotsmetricsAPIAddress string
-	BotsmetricsAPIToken   string
-	MonitorInterval       int
-	MonitorMaxStoredItems int
-	FKPTreshold           int
+	Address                 string
+	Port                    int
+	MaxMessages             int
+	TimeLimit               int
+	APIAddress              string
+	APIToken                string
+	APITokenRefreshInterval int
+	APITokenRefreshAddress  string
+	MonitorInterval         int
+	MonitorMaxStoredItems   int
+	FKPTreshold             int
 }
 
 // Returns address with port to listen to.
@@ -59,9 +67,10 @@ func (c *Config) String() string {
 // ReadConfig fills out Config struct.
 func ReadConfig() *Config {
 	cfg := &Config{
-		Address:               os.Getenv(listenAddress),
-		BotsmetricsAPIAddress: os.Getenv(botsmetricsAPIAddress),
-		BotsmetricsAPIToken:   os.Getenv(botsmetricsAPIToken),
+		Address:                os.Getenv(listenAddress),
+		APIAddress:             os.Getenv(APIAddress),
+		APIToken:               os.Getenv(APIToken),
+		APITokenRefreshAddress: os.Getenv(APITokenRefreshAddress),
 	}
 
 	common.ReadEnvIntParam(&cfg.Port, 3050, listenPort)
@@ -70,6 +79,7 @@ func ReadConfig() *Config {
 	common.ReadEnvIntParam(&cfg.MonitorInterval, 300, monitorInterval)
 	common.ReadEnvIntParam(&cfg.MonitorMaxStoredItems, 3, monitorMaxStoredItems)
 	common.ReadEnvIntParam(&cfg.FKPTreshold, 1000, fkpThreshold)
+	common.ReadEnvIntParam(&cfg.APITokenRefreshInterval, 86400, APITokenRefreshInterval)
 
 	return cfg
 }
